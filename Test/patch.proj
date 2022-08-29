@@ -1,0 +1,363 @@
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="BuildKickStart">
+
+	<Import Project="MDT.tasks"/>
+	<Import Project="Properties.props"/>
+  <Import Project="FileList.props"/>
+	<Import Project="$(MSBuildExtensionsPath)\ExtensionPack\4.0\MSBuild.ExtensionPack.tasks"/>
+
+
+<!--%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MS27000%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-->
+
+  <Target Name="CheckDriveSpace">
+    <MSBuild.ExtensionPack.Computer.SystemDrive TaskAction="CheckDriveSpace" Drive="c:\" MinSpace="1" Unit="GB"/>
+  </Target>
+
+  <Target Name="PreBuildCleanup">
+    <ItemGroup>
+      <Folders Include="$(MEDIA_ROOT)"/>
+	  <FilesToClean Include="$(CITIATM_BASEDIR)\Source\bin\*.*" />
+    </ItemGroup>
+    <RemoveDir Condition="Exists('%(Folders.Identity)')" Directories="%(Folders.Identity)"/>
+	<MakeDir Directories="%(Folders.Identity)"/>
+    <RemoveDir Condition="Exists('C:\programdata\mcafee\DesktopProtection\OnDemandScanLog.txt')"
+			   Directories="C:\programdata\mcafee\DesktopProtection\OnDemandScanLog.txt"/>
+	<Delete Files="@(FilesToClean)" ContinueOnError="true"/>
+  </Target>
+  
+  
+  <Target Name="BuildCitiATMProjects" DependsOnTargets="UpdateSharedAssemblyInfo">
+	  <Message Text="Building all solution projects"/>
+	    <MSBuild Targets="Rebuild" Projects="@(SolutionFiles)" Properties="Configuration=Release;ToolsVersion=12.0;PlatformToolset=Windows7.1SDK"/>
+  </Target>
+  
+  <Target Name="UpdateSharedAssemblyInfo">
+	  <Message Text="Updating SharedAssemblyInfo.cs"/>
+	    <PropertyGroup>
+		  <Today>$([System.DateTime]::Now.ToString("MM/dd/yy"))</Today>
+		  <FileName>$(CITIATM_BASEDIR)\Source\SharedAssemblyInfo.cs</FileName>
+		  <RegExPattern>\"[^\"]*\"</RegExPattern>
+		  <ReplacementString>"$(CitiATMVERSION) $(CitiATMHO) $(BUILD_TYPE) $(Today)"</ReplacementString>
+		  <CCComment>"Updated by the build process for $(CitiATMVERSION) $(CitiATMHO) on $(Today)"</CCComment>
+	    </PropertyGroup>
+	  <Exec Command="cleartool co -c $(CCComment) $(FileName)" ContinueOnError="true"/>
+	  <MSBuild.ExtensionPack.FileSystem.File TaskAction="Replace" RegexPattern="$(RegExPattern)" Replacement="$(ReplacementString)" Files="$(FileName)" ContinueOnError="true"/>
+	  <Exec Command="cleartool ci -ide -c $(CCComment) $(FileName)" ContinueOnError="true"/>
+  </Target>	
+  
+  
+
+  
+<!--Inputs to Copy the required folders from the VOB-->
+	<ItemGroup>
+		<Patch_scripts Include="$(BaseDir)\CITIATM_W7\PatchScripts\BaseScripts\Scripts\**\*.*" Exclude="$(BaseDir)\CITIATM_W7\PatchScripts\BaseScripts\Scripts\WinPE_Drivers.cab;"/>
+		<Patch_Rules Include="$(BaseDir)\CITIATM_W7\PatchScripts\BaseScripts\Rules\CustomSettings.ini" />		
+		<Patch_Tasks Include="$(BaseDir)\CITIATM_W7\PatchScripts\BaseScripts\Task Templates\ts.xml" />		
+		<Lockdown_Tasks Include="$(BaseDir)\CITIATM_W7\CBNACITIATM\InstallScripts\Lockdown\ts.xml" />
+		<Lockdown_Rules Include="$(BaseDir)\CITIATM_W7\PatchScripts\$(PatchVersion)\Rules\LockdownCustomSettings.ini" />
+		<Patch_Tools Include="$(BaseDir)\CITIATM_W7\PatchScripts\BaseScripts\Tools\**\*.*" Exclude="$(BaseDir)\CITIATM_W7\PatchScripts\BaseScripts\Tools\x86\Images\Thumbs.db;" />
+		<Patch_StartInstallationCmdfile Include="$(BaseDir)\CITIATM_W7\PatchScripts\BaseScripts\StartInstallation.cmd" />
+		<Patch_CitiRules Include="$(BaseDir)\CITIATM_W7\PatchScripts\$(PatchVersion)\Rules\CustomSettings.ini" />		
+		<Patch_CitiTasks Include="$(BaseDir)\CITIATM_W7\PatchScripts\$(PatchVersion)\Task Templates\ts.xml" />
+		<Patch_CitiScripts Include="$(BaseDir)\CITIATM_W7\PatchScripts\$(PatchVersion)\Scripts\**\*.*" />
+	</ItemGroup>
+		
+		
+  <Target Name="BuildKickStart" DependsOnTargets="">
+    <CallTarget Targets="%(BuildOrder.Identity)"/>
+  </Target>
+
+
+  <Target Name="BuildPreRequistes">
+    <RemoveDir Condition="Exists('$(PATCH_ROOT)')" Directories="$(PATCH_ROOT)"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\GlobalApps"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\RegionalApps"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\RegionalApps\ASIA"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\RegionalApps\CBNA"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\RegionalApps\CBNA\Store"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\RegionalApps\CBNA\Configuration"/>
+	<MakeDir Directories="$(Patch_DeploymentShare)\Applications\RegionalApps\CBNA\Language"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\RegionalApps\EUROPE"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\RegionalApps\LATAM"/>
+	<MakeDir Directories="$(Patch_DeploymentShare)\Applications\RegionalApps\ReleaseVersionHandler"/>	
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\ServiceProviders"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\ServiceProviders\NCR"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\ServiceProviders\DBC"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\ServiceProviders\HYO"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\GlobalApps\A2IA"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\GlobalApps\CITISECURITY"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\GlobalApps\KAL"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\GlobalApps\LOQUENDO"/>
+    <MakeDir Directories="$(Patch_DeploymentShare)\Applications\GlobalApps\MICROSOFT\HotFixes"/>
+  </Target>
+   <Target Name="CopyWebOpScripts">
+      <ItemGroup>
+        <ImportsScripts Include="$(CITIATM_BASEDIR)\WebOperator\Scripts\**\*.*;"/>
+		<ImportsStyles Include="$(CITIATM_BASEDIR)\WebOperator\Styles\**\*.*;"/>
+		<ImportsImages Include="$(CITIATM_BASEDIR)\WebOperator\Images\*.*;"/>
+		<ImportsSubImages Include="$(CITIATM_BASEDIR)\WebOperator\Images\**\*.*;"/>
+<!--<ImportsActiveDirectory Include="$(CITIATM_BASEDIR)\WebOperator\Scripts\ActiveDirectory\*.*;"/>
+<ImportsCommonScreens Include="$(CITIATM_BASEDIR)\WebOperator\Scripts\CommonScreens\*.*;"/>
+<ImportsCommonScreens Include="$(CITIATM_BASEDIR)\WebOperator\Scripts\CommonScreens\*.*;"/>  -->     
+      </ItemGroup>
+    <Copy SourceFiles="@(ImportsScripts)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\SupervisorScreens\WebOperator\%(RecursiveDir)"/>
+<Copy SourceFiles="@(ImportsStyles)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\SupervisorScreens\WebOperator\%(RecursiveDir)"/>
+<Copy SourceFiles="@(ImportsImages)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\SupervisorScreens\WebOperator"/>
+<Copy SourceFiles="@(ImportsSubImages)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\SupervisorScreens\WebOperator\Images\%(RecursiveDir)"/>
+  </Target>
+  
+  <Target Name="CopyWebOpStyles">
+      <ItemGroup>
+    <ImportsScripts Include="$(CITIATM_BASEDIR)\WebOperator\Styles\**\*.*;"/>
+	<!--<Importsinterstate Include="	$(CITIATM_BASEDIR)\WebOperator\Styles\interstate\*.*;"/>
+	<ImportsStylesheets Include="	$(CITIATM_BASEDIR)\WebOperator\Styles\Stylesheets\*.*;"/>   -->   
+      </ItemGroup>
+    <Copy SourceFiles="@(ImportsScripts)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\SupervisorScreens\WebOperator\%(RecursiveDir)"/>	
+	<!--<Copy SourceFiles="@(Importsinterstate)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\SupervisorScreens\WebOperator\interstate"/>	
+	<Copy SourceFiles="@(ImportsStylesheets)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\SupervisorScreens\WebOperator\Stylesheets"/>	-->
+  </Target>
+  <Target Name="CopyWebOpImages">
+      <ItemGroup>
+        <ImportsScripts Include="$(CITIATM_BASEDIR)\WebOperator\Images\**\*.*;"/>        
+      </ItemGroup>
+    <Copy SourceFiles="@(ImportsScripts)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\SupervisorScreens\WebOperator\Images\%(RecursiveDir)"/>	
+  </Target>
+  
+    <Target Name="CopyCitiDlls">
+      <ItemGroup>
+        <ImportsDlls Include="$(CITIATM_BASEDIR)\Source\bin\Citi*.dll;
+							  $(CITIATM_BASEDIR)\Source\bin\HTTPSvcAdapter.dll;
+							  $(CITIATM_BASEDIR)\Source\bin\WebOp.dll;
+							  $(CITIATM_BASEDIR)\Source\bin\ShareData.dll;
+							  $(CITIATM_BASEDIR)\Source\bin\RuleContainer.dll;
+							  $(CITIATM_BASEDIR)\Source\Certificate Management\CertManagementToolLibrary\Files\CertificateToolConfig.xml;
+						    $(CITIATM_BASEDIR)\Imports\StimInterface.dll" Exclude="$(CITIATM_BASEDIR)\Source\bin\Citi.Error*.dll;"/>
+        <ImportExe Include="$(CITIATM_BASEDIR)\Source\bin\InstallCert.exe"/>
+      </ItemGroup>
+    <Copy SourceFiles="@(ImportsDlls)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CITIKAP\Imports"/>
+	<Copy SourceFiles="@(ImportExe)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CITIKAP\SupervisorScreens\WebOperator"/>
+  </Target>
+  <Target Name="CopyLocalFileMergeExe">
+      <ItemGroup>
+        <ImportExe Include="$(CITIATM_BASEDIR)\Source\bin\MergeSessionLocal.exe"/>
+		<ImportXML Include="$(CITIATM_BASEDIR)\Source\Config Tools\Merge Session Local\LocalFileMergeParameters.Xml"/>
+      </ItemGroup>
+	<Copy SourceFiles="@(ImportExe)" DestinationFolder="$(Patch_DeploymentShare)\Scripts"/>
+	<Copy SourceFiles="@(ImportXML)" DestinationFolder="$(Patch_DeploymentShare)\Scripts"/>
+  </Target>
+  
+  <Target Name="CopyVIPFiles">
+      <ItemGroup>
+        <VIP_ApplicationUI Include="$(CITIATM_BASEDIR)\Screens - VIP\ApplicationUI\**\*.*"/>
+		<VIP_Images Include="$(CITIATM_BASEDIR)\Screens - VIP\Images\*.*"/>
+		<VIP_Scripts Include="$(CITIATM_BASEDIR)\Screens - VIP\Scripts\*.*"/>
+		<VIP_Styles Include="$(CITIATM_BASEDIR)\Screens - VIP\Styles\*.*"/>
+      </ItemGroup>
+	<Copy SourceFiles="@(VIP_ApplicationUI)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\Screens - VIP\%(RecursiveDir)"/>
+	<Copy SourceFiles="@(VIP_Images)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\Screens - VIP\%(RecursiveDir)"/>
+	<Copy SourceFiles="@(VIP_Scripts)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\Screens - VIP\%(RecursiveDir)"/>
+	<Copy SourceFiles="@(VIP_Styles)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\CitiKAP\Screens - VIP\%(RecursiveDir)"/>
+  </Target>
+  <Target Name="CitiDynamicCopy" Inputs="%(FileToReplicate.Identity)" Outputs="%(FileToReplicate.Identity)">
+    <Message Text="--------------- Copying %(FileToReplicate.Identity)----------------------" Importance="high"/>
+    <ItemGroup>
+      <IndividualFile Include="%(FileToReplicate.FileList)"> </IndividualFile>
+    </ItemGroup>
+    <PropertyGroup>
+      <SourcePath>%(FileToReplicate.SourcePath)</SourcePath>
+      <DestinationFolder>%(FileToReplicate.DestinationPath)</DestinationFolder>
+    </PropertyGroup>
+    <Message Text="$(SourcePath)%(IndividualFile.Identity)" Importance="high"/>
+    <!--Just shoot a warning if the file do not exist in the Source path-->
+    <Copy ContinueOnError="false" 
+      SourceFiles="$(SourcePath)%(IndividualFile.Identity)" 
+      DestinationFolder="$(DestinationFolder)\%(IndividualFile.RelativeDir)"
+      >
+    </Copy>
+  </Target>
+
+ <!-- <PropertyGroup>
+    <ADBuildOrder>
+	CopyWebOpStyles;CopyWebOpScripts;CopyWebOpImages
+	   </ADBuildOrder>
+  </PropertyGroup>-->
+
+  <Target Name="CopyTemplates">
+    <ItemGroup>
+      <Templates Include="$(BaseDir)\CITIATM_W7\TEMPLATES\**\*.*"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(Templates)" DestinationFolder="$(Patch_DeploymentShare)\Templates\%(RecursiveDir)"/>
+  </Target>
+
+	<Target Name="Copy_Scripts">
+		<Copy SourceFiles="@(Patch_scripts)" DestinationFiles="@(Patch_scripts->'$(Patch_DeploymentShare)\Scripts\%(RecursiveDir)%(Filename)%(Extension)')"/>
+		<Copy SourceFiles="@(Patch_Rules)" DestinationFiles="$(Patch_DeploymentShare)\Control\CustomSettings.ini"/>
+		<Copy SourceFiles="@(Patch_Tasks)" DestinationFiles="$(Patch_DeploymentShare)\Control\PATCHTASKS\ts.xml"/>
+		<Copy SourceFiles="@(Lockdown_Tasks)" DestinationFiles="$(Patch_DeploymentShare)\Control\LOCKDOWN\ts.xml"/>
+		<Copy SourceFiles="@(Lockdown_Rules)" DestinationFiles="$(Patch_DeploymentShare)\Control\LOCKDOWN\CustomSettings.ini"/>
+		<Copy SourceFiles="@(Patch_Tools)" DestinationFiles="@(Patch_Tools->'$(Patch_DeploymentShare)\Tools\%(RecursiveDir)%(Filename)%(Extension)')"/>
+		<Copy SourceFiles="@(Patch_StartInstallationCmdfile)" DestinationFiles="$(Patch_DeploymentShare)\StartInstallation.cmd"/>
+	</Target>
+	
+	<Target Name="Copy_CitiScripts">
+		<Copy SourceFiles="@(Patch_CitiRules)" DestinationFiles="$(Patch_DeploymentShare)\Control\CustomSettings.ini"/>
+		<Copy SourceFiles="@(Patch_CitiTasks)" DestinationFiles="$(Patch_DeploymentShare)\Control\PATCHTASKS\ts.xml"/>
+		<Copy SourceFiles="@(Patch_CitiScripts)" DestinationFolder="$(Patch_DeploymentShare)\Scripts\"/>
+	</Target>
+	
+	<Target Name="Copy_VendorDelta">
+		<ItemGroup>
+			<NCRDelta Include="$(BaseDir)\CITIATM_W7\VendorDelta\NCR\Delta\NCR_EPP_Fix_Final.P01\**\*.*"/>
+			<!--<DBCDelta Include="$(BaseDir)\CITIATM_W7\VendorDelta\DBC\Delta\DBC1501P13CBNA\**\*.*"/>
+			<DBCDelta1 Include="$(BaseDir)\CITIATM_W7\VendorDelta\DBC\Delta\DBC1702P14CBNA\**\*.*"/>
+			<HYOEPP Include="$(BaseDir)\CITIATM_W7\VendorDelta\HYO\Delta\NH_EPVersion.txt"/>-->
+			
+		</ItemGroup>
+	<Copy SourceFiles="@(NCRDelta)" DestinationFolder="$(Patch_DeploymentShare)\Applications\ServiceProviders\NCR\Delta\NCR_EPP_Fix_Final.P01\%(RecursiveDir)"/>
+	<!--<Copy SourceFiles="@(DBCDelta)" DestinationFolder="$(Patch_DeploymentShare)\Applications\ServiceProviders\DBC\Delta\DBC1501P13CBNA\%(RecursiveDir)"/>
+	<Copy SourceFiles="@(DBCDelta1)" DestinationFolder="$(Patch_DeploymentShare)\Applications\ServiceProviders\DBC\Delta\DBC1702P14CBNA\%(RecursiveDir)"/>
+	<Copy SourceFiles="@(HYOEPP)" DestinationFolder="$(Patch_DeploymentShare)\Applications\ServiceProviders\HYO\Delta\%(RecursiveDir)"/>-->
+	</Target>
+	
+	<Target Name="Copy_Hotfix">
+		<ItemGroup>
+			<HotFix Include="$(BaseDir)\CITIATM_W7\PatchScripts\$(PatchVersion)\HotFix\*.*"/>
+		</ItemGroup>
+    <Copy SourceFiles="@(HotFix)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\MICROSOFT\HotFixes\%(RecursiveDir)"/>
+	</Target>
+	
+	<Target Name="Copy_Registry">
+		<ItemGroup>
+			<RegistryFile Include="$(BaseDir)\CITIATM_W7\PatchScripts\$(PatchVersion)\Registry\*.*"/>
+		</ItemGroup>
+    <Copy SourceFiles="@(RegistryFile)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\Registry\%(RecursiveDir)"/>
+	</Target>
+  
+	<Target Name="Copy_CitiLockdown">
+		<ItemGroup>
+        <CitiLockdown Include="$(CITIATM_BASEDIR)\Kalignite\CitiLockdown\KXLockdown.exe;
+							  $(CITIATM_BASEDIR)\Kalignite\CitiLockdown\globalfirewallrules.xml;
+							  $(CITIATM_BASEDIR)\Kalignite\CitiLockdown\Apply-CitiLockdown.ps1;"/>
+		<Lockdown Include="$(CITIATM_BASEDIR)\Kalignite\Lockdown\BlockedExecutables.txt;"/>
+      </ItemGroup>
+	  <Copy SourceFiles="@(CitiLockdown)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\Kalignite\CitiLockdown"/>
+	  <Copy SourceFiles="@(Lockdown)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\Kalignite\Lockdown"/>
+	</Target>
+	<Target Name="Copy_CitiOverlayEXE">
+		<ItemGroup>
+        <OverlayExe Include="$(ATMREP_TEMP)\CITI-Win7OverlayScreen\bin\Win7OverlayScreen.exe"/>
+      </ItemGroup>
+	  <Copy SourceFiles="@(OverlayExe)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\Utilities"/>
+	</Target>
+	<Target Name="Copy_CitiServiceInstaller">
+		<ItemGroup>
+        <CitiServiceInstaller Include="$(ATMREP_TEMP)\CITI-CitiService\bin\CitiServiceInstaller.msi"/>
+      </ItemGroup>
+	  <Copy SourceFiles="@(CitiServiceInstaller)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\Utilities"/>
+	</Target>
+	<Target Name="Copy_CabarcEXE">
+		<ItemGroup>
+        <CabarcExe Include="$(ATMREP_TEMP)\CabArc\cabarc.exe"/>
+      </ItemGroup>
+	  <Copy SourceFiles="@(CabarcExe)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\Utilities"/>
+	</Target>
+	<Target Name="Copy_ATMCertificates">
+	  <ItemGroup>
+        <ATMUSEREncryption Include="$(BaseDir)\CITIATM_W7\Installscripts\ATMUserEncryptionCert.p12"/>
+		<!--<ATMDigitalSign Include="$(BaseDir)\CITIATM_W7\Installscripts\ATMDigitalSiginigPubCert.cer"/>-->
+		<ATMUserEntitlementRoot Include="$(BaseDir)\CITIATM_W7\Installscripts\*.cer"/>											
+		<Map Include="$(BaseDir)\CITIATM_W7\Installscripts\Map.xml"/>
+		<GOP Include="$(BaseDir)\CITIATM_W7\Startup\GOPSetter\**\*.*"/>
+      </ItemGroup>
+	  <Copy SourceFiles="@(ATMUSEREncryption)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIBank"/>
+	  <!--Copy SourceFiles="@(ATMDigitalSign)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIBank"/>-->
+	  <Copy SourceFiles="@(ATMUserEntitlementRoot)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIBank"/>
+	  <Copy SourceFiles="@(Map)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIBank"/>
+	  <Copy SourceFiles="@(GOP)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\GOPSetter\%(RecursiveDir)"/>
+	</Target>
+	<Target Name="PatchInstallationHelper">
+		<ItemGroup>
+        <InstalltionHelper Include="$(CITIATM_BASEDIR)\UTILITIES\CitiInstaller.exe;
+							 $(CITIATM_BASEDIR)\UTILITIES\RunSilent.cmd"/>
+		<InstallAccount Include="$(CITIATM_BASEDIR)\UTILITIES\CitiAct.Pwf;
+							 $(CITIATM_BASEDIR)\UTILITIES\AdminAct.PWF"/>
+        <PowerSettings Include="$(CITIATM_BASEDIR)\UTILITIES\PowerSettings.cmd"/>							 
+      </ItemGroup>
+	  <Copy SourceFiles="@(InstalltionHelper)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\Utilities"/>
+	  <Copy SourceFiles="@(InstallAccount)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\Utilities"/>
+	  <Copy SourceFiles="@(PowerSettings)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\Utilities"/>
+	</Target>
+	<Target Name="Copy_KALFiles">
+		<ItemGroup>
+			<K3ADll Include="$(BaseDir)\CITIATM_W7\PatchScripts\$(PatchVersion)\K3A\Dll\*.*"/>
+			<KaligniteDll Include="$(BaseDir)\CITIATM_W7\PatchScripts\$(PatchVersion)\Kalignite\Dll\*.*"/>
+			<KALFILES Include="$(BaseDir)\CITIATM_W7\PatchScripts\$(PatchVersion)\KAL\*.*"/>
+		</ItemGroup>
+    <Copy SourceFiles="@(K3ADll)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\K3A\Dll\%(RecursiveDir)"/>
+	<Copy SourceFiles="@(KaligniteDll)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\KAL\Kalignite\Dll\%(RecursiveDir)"/>
+	<Copy SourceFiles="@(KALFILES)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\KAL\%(RecursiveDir)"/>
+	</Target>
+  <Target Name="CopyGPOPolicies">
+    <ItemGroup>
+     <GPOPolcies Include="$(ATMREP_TEMP)\CITI-CitiSecurity\bin\**\*.*"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(GPOPolcies)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITISECURITY\%(RecursiveDir)"/>
+  </Target>
+
+<Target Name="CopyConfigDir">
+    <ItemGroup>
+      <VendorConfigDir Include="$(CITIATM_BASEDIR)\VendorConfig\**\*.*" Exclude="$(CITIATM_BASEDIR)\VendorConfig\**\*.db;
+                                $(CITIATM_BASEDIR)\VendorConfig\**\BNATemplates\**" />
+    </ItemGroup>
+    <Copy SourceFiles="@(VendorConfigDir)" DestinationFolder="$(Patch_DeploymentShare)\Applications\GlobalApps\CITIATM\Config\%(RecursiveDir)"/>
+  </Target>
+
+
+  <Target Name="CopyATMREPToLocal">
+		<ItemGroup>
+			<ATMRepTools Include="$(ATMREP_BASEDIR)\**\*.*"/>
+		</ItemGroup>
+		<Copy SourceFiles="@(ATMRepTools)" DestinationFolder="$(ATMREP_TEMP)\%(RecursiveDir)"/>
+	</Target>
+	
+	<!--Digital Signing for CITI content in patch build-->
+	<Target Name="SignContent">
+		<Exec Command="CITI_SignFiles.bat $(TEMP_SIGNTOOLPATH) PATCH &quot;$(Patch_DeploymentShare)&quot; $(BUILD_TYPE)" WorkingDirectory="$(TEMP_SIGNTOOLPATH)"/>		
+	</Target> 
+	
+	<!-- Creating patch checksum-->
+  <Target Name="CreatePatchChecksum">
+	<MakeDir Directories= "$(MEDIA_ROOT)\Checksum" Condition="!Exists('$(MEDIA_ROOT)\Checksum')"/>
+    <Delete Files="$(MEDIA_ROOT)\Checksum\$(PatchVersion)_kxpkg_Checksum" Condition="Exists('$(MEDIA_ROOT)\Checksum\$(PatchVersion)_kxpkg_Checksum')"/>
+    <Exec Command="Sha256.exe -o &quot;$(MEDIA_ROOT)\Checksum\$(PatchVersion)_kxpkg_Checksum&quot; -x -I &quot;$(MEDIA_ROOT)\Patch\$(PatchVersion).kxpkg&quot;" WorkingDirectory="C:\BuildDep"/>
+  </Target>
+			
+			
+	<Target Name="CreateKTCPackage">
+		<Exec Command="KTCPackager /UseTrustedInstaller /OutputFile &quot;$(MEDIA_ROOT)\Patch\$(PatchVersion).kxpkg&quot; /InstallMethod REIMAGE /InstallTime REBOOT /Name $(PatchVersion) /Version $(PatchVersion) /Command StartInstallation.cmd /Source &quot;$(Patch_DeploymentShare)&quot;" WorkingDirectory="C:\Program Files (x86)\KAL\Kalignite\Dll"/>
+	</Target>
+  
+  <Target Name="CleanupPatchDeploymentShare">
+    <RemoveDir Condition="Exists('$(Patch_DeploymentShare)')" Directories="$(Patch_DeploymentShare)"/>
+  </Target>
+  
+  <Target Name="RunVirusScan_patch">
+	<Exec Command="scan32.exe &quot;$(MEDIA_ROOT)\Patch\$(PatchVersion).kxpkg&quot; /autoexit" WorkingDirectory="C:\Program Files (x86)\McAfee\VirusScan Enterprise\"  IgnoreExitCode="True"/>
+	<Copy SourceFiles="C:\programdata\mcafee\DesktopProtection\OnDemandScanLog.txt" DestinationFolder="$(MEDIA_ROOT)\Logs"/>
+  </Target>
+  <!--Target to automatically copy the build output into KALRLS location for only CM build-->
+  <Target Name="CopyToKalrls" Condition="'$(BUILD_TYPE)'=='CM'">
+    <Message Text="Copy build output to KALRLS path"/>
+    <PropertyGroup>
+	  <Today>$([System.DateTime]::Now.ToString("MMddyyyy"))</Today>
+	  <!--<CMBuildOutputPath>$(CM_PATH)\$(CitiATMVERSION)\$(CitiATMVERSION)\Handoff_CM_$(CITIATMHO)_$(Today)</CMBuildOutputPath>-->
+	  <CMBuildOutputPath>$(CM_PATH)\$(CitiATMVERSION)\$(CitiATMVERSION)\Handoff_CM_$(CITIATMHO)_$(Patch)_$(Today)</CMBuildOutputPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <BuildOutput Include="$(MEDIA_ROOT)\**\*.*"/>
+      <Logs Include="C:\Logs\**\*.*"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(BuildOutput)" DestinationFolder="$(CMBuildOutputPath)\%(RecursiveDir)"/>
+    <Copy SourceFiles="@(Logs)" DestinationFolder="$(CMBuildOutputPath)\Logs" />
+  </Target>
+</Project>

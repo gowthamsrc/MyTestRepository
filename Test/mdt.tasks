@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--MDTTasks - custom task in msbuild-->
+  <!-- Custom tasks are created to construct and execute the Powershell cmdlets.Arguments to tehse tasks will ba passed form Msbuild project file -->
+  <UsingTask TaskName="MDTTasks.CreateCitiMedia" AssemblyFile="C:\BuildDep\MDTTasks.dll" />
+  <UsingTask TaskName="MDTTasks.CreateDeploymentMedia" AssemblyFile="C:\BuildDep\MDTTasks.dll" />
+  <UsingTask TaskName="MDTTasks.CreateDeploymentShare" AssemblyFile="C:\BuildDep\MDTTasks.dll" />
+  <UsingTask TaskName="MDTTasks.CreateLogicalFolder" AssemblyFile="C:\BuildDep\MDTTasks.dll" />
+  <UsingTask TaskName="MDTTasks.CreateSelectionProfile" AssemblyFile="C:\BuildDep\MDTTasks.dll" />
+  <UsingTask TaskName="MDTTasks.ImportApplication" AssemblyFile="C:\BuildDep\MDTTasks.dll" />
+  <UsingTask TaskName="MDTTasks.ImportOperatingSystem" AssemblyFile="C:\BuildDep\MDTTasks.dll" />
+  <UsingTask TaskName="MDTTasks.ImportTaskSequence" AssemblyFile="C:\BuildDep\MDTTasks.dll" />
+  <UsingTask TaskName="MDTTasks.UpdateDeploymentMedia" AssemblyFile="C:\BuildDep\MDTTasks.dll" />
+</Project>

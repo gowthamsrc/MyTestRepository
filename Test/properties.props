@@ -1,0 +1,76 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!--For CMBuild - Make sure to verify the CitiATMVERSION and CitiATMHO properties 
+       inorder to copy the build output to the dynamically formed KALRLS location  -->	
+    <ATMREP_BASEDIR>..\..\..\PatchScripts\ATMREP_TOOLS\</ATMREP_BASEDIR>
+    <CM_PATH>\\mwdvnasnfsp0237\atmrls\kalrls</CM_PATH>
+    <BASEDIR>..\..\..\..</BASEDIR>
+    <DEPLOYMENT_SHARE_PATH>C:\CITIATMDeploymentShare</DEPLOYMENT_SHARE_PATH>
+    <MEDIA_ROOT>C:\CITIATM Media Store</MEDIA_ROOT>
+    <PATCH_ROOT>$(MEDIA_ROOT)\Patch</PATCH_ROOT>
+    <Patch_DeploymentShare>$(MEDIA_ROOT)\Patch\DeploymentShare</Patch_DeploymentShare>
+    <OSObject>Operating Systems\CAPTURE_IMAGEDDrive in CITIATM CITIATM.wim</OSObject>
+    <CITIATMVENDORVERSION>CATMGD1603</CITIATMVENDORVERSION>
+    <CITIATMVERSION>CATM17011</CITIATMVERSION>
+    <CitiATMHO>R2HO#1</CitiATMHO>
+    <Patch>P1</Patch>
+    <PatchVersion>CATM17011P1</PatchVersion>
+    <GlobalCAB_Source>$(MEDIA_ROOT)\Upgrade\Global Upgrade cab\$(CITIATMVENDORVERSION)_$(CitiATMHO).cab</GlobalCAB_Source>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TEMP_FOLDER>C:\BuildTemp</TEMP_FOLDER>
+	<CODE_ANALYSIS_DIR>C:\CodeAnalysis</CODE_ANALYSIS_DIR>
+    <CODE_ANALYSIS_PROJECT_KEY>CATM15010</CODE_ANALYSIS_PROJECT_KEY>
+	<CODE_ANALYSIS_BUSINESS>CBNA</CODE_ANALYSIS_BUSINESS>
+    <ATMREP_TEMP>$(TEMP_FOLDER)\ATMRepTools</ATMREP_TEMP>
+    <TEMP_SIGNTOOLPATH>$(TEMP_FOLDER)\ATMRepTools\CITI-DigitalSigning</TEMP_SIGNTOOLPATH>
+    <CITIATM_BASEDIR>$(BASEDIR)\CITIATM_W7</CITIATM_BASEDIR>
+    <CITIATM_TEMP>$(TEMP_FOLDER)\CITIATM</CITIATM_TEMP>
+    <SPCAB_TEMP>$(TEMP_FOLDER)\SPTemp</SPCAB_TEMP>
+  </PropertyGroup>
+  
+  
+  <ItemGroup>
+		<SolutionFiles Include="../../../Source/BuildAll.sln;"/>
+    <!--<SolutionFiles Include="../../../Source/Loquendo.sln;"/>
+    <SolutionFiles Include="../../../Source/A2IAImageProcessor.sln"/>-->
+  </ItemGroup>
+  
+  <ItemGroup>
+      <BuildOrder Include="CheckDriveSpace"/>
+      <BuildOrder Include="PreBuildCleanup"/>
+      <BuildOrder Include="BuildPreRequistes"/>
+      <BuildOrder Include="CopyTemplates"/>
+      <BuildOrder Include="CopyATMREPToLocal"/>
+      <!--<BuildOrder Include="CopyConfigDir"/>-->
+      <BuildOrder Include="CopyGPOPolicies"/>
+	  <!--<BuildOrder Include="BuildCitiATMProjects"/>-->
+     <!--<BuildOrder Include="CopyCitiDlls"/>-->
+      <BuildOrder Include="CitiDynamicCopy"/>  
+	  <!--<BuildOrder Include="CopyVIPFiles"/>-->
+	  <!--<BuildOrder Include="CopyWebopImages"/>-->
+      <BuildOrder Include="Copy_Scripts"/>  
+      <BuildOrder Include="Copy_CitiScripts"/>
+      <!--<BuildOrder Include="CopyLocalFileMergeExe"/>--><!-- Uncomment it when using Session.local.xml -->
+      <BuildOrder Include="Copy_VendorDelta"/>
+      <BuildOrder Include="Copy_Hotfix"/>
+      <BuildOrder Include="Copy_Registry"/>
+      <BuildOrder Include="Copy_CitiLockdown"/>
+      <BuildOrder Include="Copy_CitiOverlayEXE"/>
+	  <BuildOrder Include="Copy_CitiServiceInstaller"/>
+	  <BuildOrder Include="Copy_CabarcEXE"/>
+	  <BuildOrder Include="Copy_ATMCertificates"/>
+      <BuildOrder Include="PatchInstallationHelper"/>
+  <!--<BuildOrder Include="Copy_KALFiles"/>-->
+  <!--<BuildOrder Include="CopyATMREPToLocal"/>-->
+      <BuildOrder Include="SignContent"/>
+      <BuildOrder Include="CreateKTCPackage"/>
+	  <BuildOrder Include="CreatePatchChecksum"/>
+	  <BuildOrder Include="RunVirusScan_patch"/>
+      <BuildOrder Include="CleanupPatchDeploymentShare"/>
+      <BuildOrder Include="CopyToKalrls"/>
+  </ItemGroup>
+  
+</Project>
+
