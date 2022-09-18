@@ -43,7 +43,7 @@ public class TestGreeter {
 
   @Test
   public void greetShouldAddTestMessage() {
-    String someone = "World, Adding a new Sample";
+    String someone = "World, changing the sample";
 
     assertThat(greeter.greet(someone).length(), is(greaterThan(someone.length())));
   }
