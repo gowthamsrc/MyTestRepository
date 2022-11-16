@@ -1,9 +1,14 @@
 pipeline {
-  agent any
+  agent {
+    node {
+      label 'ubuntu-Linux'
+    }
+
+  }
   stages {
-    stage('') {
+    stage('Buzz Buzz') {
       steps {
-        bat 'echo hello world'
+        echo 'Bee Buzz!!'
       }
     }
 
