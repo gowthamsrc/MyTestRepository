@@ -21,6 +21,7 @@ pipeline {
     stage('Bees Buzzing Again') {
       steps {
         echo 'Bees Buzzing Again'
+        sh 'mvn clean install "maven-samples/single-module"'
       }
     }
 
