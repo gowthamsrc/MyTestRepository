@@ -21,7 +21,8 @@ pipeline {
     stage('Bees Buzzing Again') {
       steps {
         echo 'Bees Buzzing Again'
-        sh 'mvn clean install "java-tomcat-sample"'
+        sh '''cd "/java-tomcat-sample"
+mvn clean install '''
       }
     }
 
