@@ -46,7 +46,7 @@ pipeline {
 
         stage('Build and archive') {
           steps {
-            dir(path: 'java-tomcat-sample') {
+            dir(path: 'maven-samples/single-module') {
               sh 'mvn -f pom.xml clean package'
               archiveArtifacts(artifacts: 'target/*.war', fingerprint: true)
             }
