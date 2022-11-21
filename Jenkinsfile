@@ -17,13 +17,13 @@ pipeline {
         stage('print stage') {
           steps {
             echo 'Hello World'
-            sleep 50
+            sleep 5
           }
         }
 
         stage('Sleep') {
           steps {
-            sleep 50
+            sleep 5
           }
         }
 
@@ -53,6 +53,12 @@ pipeline {
           }
         }
 
+      }
+    }
+
+    stage('Archive Artifact') {
+      steps {
+        archiveArtifacts 'java-tomcat-sample/target/*.war'
       }
     }
 
