@@ -48,7 +48,7 @@ pipeline {
           steps {
             dir(path: 'maven-samples/single-module') {
               sh 'mvn -f pom.xml clean package'
-              archiveArtifacts(artifacts: 'target/*.war', fingerprint: true)
+              archiveArtifacts(artifacts: 'target/*.jar', fingerprint: true)
             }
 
           }
