@@ -17,6 +17,13 @@ pipeline {
         stage('print stage') {
           steps {
             echo 'Hello World'
+            sleep 50
+          }
+        }
+
+        stage('Sleep') {
+          steps {
+            sleep 50
           }
         }
 
@@ -39,7 +46,10 @@ pipeline {
 
         stage('Build') {
           steps {
-            sh 'mvn clean package'
+            dir(path: 'java-tomcat-sample') {
+              sh 'mvn clean package'
+            }
+
           }
         }
 
