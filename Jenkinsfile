@@ -16,7 +16,7 @@ pipeline {
 
         stage('print stage') {
           steps {
-            echo 'Hello World'
+            echo 'Hello World!! I am $Name'
             sleep 5
           }
         }
@@ -63,5 +63,8 @@ pipeline {
       }
     }
 
+  }
+  environment {
+    Name = 'Gowtham Ashok Kumar'
   }
 }
