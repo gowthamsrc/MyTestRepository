@@ -44,21 +44,16 @@ pipeline {
           }
         }
 
-        stage('Build') {
+        stage('Build and archive') {
           steps {
             dir(path: 'java-tomcat-sample') {
               sh 'mvn clean package'
+              archiveArtifacts(artifacts: 'target/*.war', fingerprint: true)
             }
 
           }
         }
 
-      }
-    }
-
-    stage('Archive Artifact') {
-      steps {
-        archiveArtifacts 'java-tomcat-sample/target/*.war'
       }
     }
 
