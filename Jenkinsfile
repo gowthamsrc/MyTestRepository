@@ -7,8 +7,19 @@ pipeline {
   }
   stages {
     stage('Buzz Buzz') {
-      steps {
-        echo 'Bee Buzz!!'
+      parallel {
+        stage('Buzz Buzz') {
+          steps {
+            echo 'Bee Buzz!!'
+          }
+        }
+
+        stage('print stage') {
+          steps {
+            echo 'Hello World'
+          }
+        }
+
       }
     }
 
@@ -19,9 +30,19 @@ pipeline {
     }
 
     stage('Bees Buzzing Again') {
-      steps {
-        echo 'Bees Buzzing Again'
-        sh 'clean package'
+      parallel {
+        stage('Bees Buzzing Again') {
+          steps {
+            echo 'Bees Buzzing Again'
+          }
+        }
+
+        stage('Build') {
+          steps {
+            sh 'mvn clean package'
+          }
+        }
+
       }
     }
 
