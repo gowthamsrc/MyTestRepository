@@ -16,7 +16,7 @@ pipeline {
 
         stage('print stage') {
           steps {
-            echo 'Hello World!! I am $Name'
+            echo 'Hello World!! I am ${Name}'
             sleep 5
           }
         }
@@ -59,7 +59,7 @@ pipeline {
 
     stage('Test') {
       steps {
-        junit '**/surefire-reports/**/*.xml'
+        junit(testResults: '**/surefire-reports/**/*.xml', skipPublishingChecks: true)
       }
     }
 
